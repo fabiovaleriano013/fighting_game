@@ -50,12 +50,14 @@ class Fighter:
         screen_height: int,
         facing_right: bool = True,
         sprite_scale: float = 0.18,
+        sprite_y_offset: int = 0,
     ):
         self.character_name = character_name
         self.player_num = player_num
         self.screen_width = screen_width
         self.screen_height = screen_height
         self.facing_right = facing_right
+        self.sprite_y_offset = sprite_y_offset
 
         # ── Física ──────────────────────────────────
         self.x = float(start_x)
@@ -63,7 +65,7 @@ class Fighter:
         self.vel_x = 0.0
         self.vel_y = 0.0
         self.on_ground = False
-        self.floor_y = screen_height - 100  # Y do chão (ajustável)
+        self.floor_y = screen_height - 10  # Y do chão (ajustável)
 
         # ── HP ──────────────────────────────────────
         self.hp = MAX_HP
@@ -104,7 +106,7 @@ class Fighter:
     def rect(self) -> pygame.Rect:
         frame = self._current_frame()
         w, h = frame.get_size()
-        return pygame.Rect(int(self.x) - w // 2, int(self.y) - h, w, h)
+        return pygame.Rect(int(self.x) - w // 2, int(self.y) - h + self.sprite_y_offset, w, h)
 
     @property
     def center_x(self) -> float:
@@ -236,8 +238,8 @@ class Fighter:
 
         if self.anim_timer >= self.frame_duration:
             self.anim_timer = 0.0
-            if self.state in (FighterState.DEAD,):
-                # Fica no último frame
+            if self.state in (FighterState.DEAD, FighterState.ATTACK, FighterState.HURT):
+                # Fica no último frame, evitando loop visual antes de voltar para idle
                 self.anim_frame = min(self.anim_frame + 1, len(frames) - 1)
             else:
                 self.anim_frame = (self.anim_frame + 1) % len(frames)
@@ -249,7 +251,14 @@ class Fighter:
     def _start_attack(self, opponent: "Fighter"):
         """Inicia um ataque."""
         self._set_state(FighterState.ATTACK)
-        self.attack_timer = ATTACK_DURATION
+        
+        # A duração do ataque se adapta à quantidade de frames
+        frames = self._get_frames()
+        if len(frames) > 0:
+            self.attack_timer = len(frames) * self.frame_duration
+        else:
+            self.attack_timer = ATTACK_DURATION
+            
         self.has_hit = False
 
     def check_attack_hit(self, opponent: "Fighter"):
@@ -274,7 +283,13 @@ class Fighter:
             return
         self.hp = max(0, self.hp - amount)
         self._set_state(FighterState.HURT)
-        self.hurt_timer = 0.3
+        
+        # A duração do stun de dano se adapta à quantidade de frames
+        frames = self._get_frames()
+        if len(frames) > 0:
+            self.hurt_timer = len(frames) * self.frame_duration
+        else:
+            self.hurt_timer = 0.3
 
         if self.hp <= 0:
             self.alive = False
@@ -294,7 +309,7 @@ class Fighter:
 
         w, h = frame.get_size()
         draw_x = int(self.x) - w // 2
-        draw_y = int(self.y) - h
+        draw_y = int(self.y) - h + self.sprite_y_offset
 
         surface.blit(frame, (draw_x, draw_y))
 

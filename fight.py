@@ -64,6 +64,7 @@ class FightScene:
             screen_height=self.h,
             facing_right=True,
             sprite_scale=1.8,
+            sprite_y_offset=75, # Altere este valor para descer/subir a imagem do personagem
         )
         self.p1.floor_y = floor_y
 
@@ -76,6 +77,7 @@ class FightScene:
             screen_height=self.h,
             facing_right=False,
             sprite_scale=1.8,
+            sprite_y_offset=75, # Altere este valor para descer/subir a imagem do personagem
         )
         self.p2.floor_y = floor_y
 

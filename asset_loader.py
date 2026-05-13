@@ -24,7 +24,7 @@ IMAGE_EXTENSIONS = {".png", ".jpg", ".jpeg", ".bmp", ".gif"}
 
 # Tamanho padrão normalizado para todos os sprites de personagens (em pixels)
 # Isso garante que todos os personagens fiquem com o mesmo tamanho no jogo
-NORMALIZED_SPRITE_SIZE = (100, 200)
+NORMALIZED_SPRITE_SIZE = (130, 230)
 
 
 # ─────────────────────────────────────────────────────────────
