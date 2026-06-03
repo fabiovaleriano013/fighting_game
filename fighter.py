@@ -16,7 +16,7 @@ JUMP_SPEED = -620       # pixels/s (negativo = para cima)
 WALK_SPEED = 280        # pixels/s
 MAX_HP = 100
 ATTACK_DAMAGE = 10
-ATTACK_RANGE = 90       # distância máxima para conectar ataque
+ATTACK_RANGE = 140      # distância máxima para conectar ataque (aumentada para hitboxes mais amigáveis)
 ATTACK_DURATION = 0.35  # segundos que o estado de ataque dura
 DEFEND_REDUCE = 0.4     # % de dano bloqueado ao defender (60% redução)
 ANIMATION_FPS = 10      # frames por segundo das animações

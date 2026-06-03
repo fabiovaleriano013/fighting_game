@@ -52,9 +52,9 @@ class MainMenu:
     """Tela de menu principal com navegação por teclado."""
 
     ITEMS = [
-        ("⚔  JOGAR",     "play"),
-        ("🎮  CONTROLES", "controls"),
-        ("✖  SAIR",       "quit"),
+        ("JOGAR",     "play"),
+        ("CONTROLES", "controls"),
+        ("SAIR",       "quit"),
     ]
 
     def __init__(self, screen: pygame.Surface):
@@ -121,7 +121,7 @@ class MainMenu:
 
             if is_sel:
                 # Seta indicadora
-                arrow = self.font_item.render("▶", True, COLOR_ACCENT)
+                arrow = self.font_item.render("", True, COLOR_ACCENT)
                 self.screen.blit(arrow, (x - 40, y + 2))
 
             self.screen.blit(surf, (x, y))
@@ -242,7 +242,7 @@ class VictoryScreen:
         self.h = screen.get_height()
         self.time = 0.0
         self.selected = 0
-        self.options = [("⚔  REVANCHE", "rematch"), ("🏠  MENU", "menu")]
+        self.options = [("REVANCHE", "rematch"), ("MENU", "menu")]
 
         self.font_big   = pygame.font.SysFont("Impact", 72)
         self.font_med   = pygame.font.SysFont("Arial", 36, bold=True)
@@ -276,7 +276,7 @@ class VictoryScreen:
 
         # Nome do personagem
         name_surf = self.font_med.render(
-            f"✦  {self.character_name.replace('_', ' ').title()}  ✦",
+            f"  {self.character_name.replace('_', ' ').title()}  ",
             True, COLOR_GOLD
         )
         self.screen.blit(name_surf, (self.w // 2 - name_surf.get_width() // 2, self.h // 4 + 80))

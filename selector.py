@@ -174,13 +174,13 @@ class CharacterSelector:
                 badge = self.font_name.render("P1", True, COLOR_P1)
                 self.screen.blit(badge, (x + 6, y + 6))
                 if self.confirmed[0]:
-                    ok = self.font_name.render("✔", True, COLOR_P1)
+                    ok = self.font_name.render("", True, COLOR_P1)
                     self.screen.blit(ok, (x + self.CARD_W - 22, y + 6))
             if sel_p2:
                 badge = self.font_name.render("P2", True, COLOR_P2)
                 self.screen.blit(badge, (x + self.CARD_W - 28, y + 6 + (16 if sel_p1 else 0)))
                 if self.confirmed[1]:
-                    ok = self.font_name.render("✔", True, COLOR_P2)
+                    ok = self.font_name.render("", True, COLOR_P2)
                     self.screen.blit(ok, (x + self.CARD_W - 22, y + 22))
 
         # Painel de instrução dos jogadores
@@ -293,8 +293,8 @@ class MapSelector:
 
         # Setas de navegação
         if len(self.map_paths) > 1:
-            left_arrow = self.font_arrow.render("❮", True, COLOR_ACCENT)
-            right_arrow = self.font_arrow.render("❯", True, COLOR_ACCENT)
+            left_arrow = self.font_arrow.render("", True, COLOR_ACCENT)
+            right_arrow = self.font_arrow.render("", True, COLOR_ACCENT)
             self.screen.blit(left_arrow, (self.w // 2 - self.THUMB_SIZE[0] // 2 - 50,
                                           self.h // 2 - 20))
             self.screen.blit(right_arrow, (self.w // 2 + self.THUMB_SIZE[0] // 2 + 14,

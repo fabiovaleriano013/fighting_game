@@ -64,7 +64,7 @@ class FightScene:
             screen_height=self.h,
             facing_right=True,
             sprite_scale=1.8,
-            sprite_y_offset=75, # Altere este valor para descer/subir a imagem do personagem
+            sprite_y_offset=100, # Altere este valor para descer/subir a imagem do personagem
         )
         self.p1.floor_y = floor_y
 
@@ -77,7 +77,7 @@ class FightScene:
             screen_height=self.h,
             facing_right=False,
             sprite_scale=1.8,
-            sprite_y_offset=75, # Altere este valor para descer/subir a imagem do personagem
+            sprite_y_offset=100, # Altere este valor para descer/subir a imagem do personagem
         )
         self.p2.floor_y = floor_y
 
@@ -290,9 +290,9 @@ class FightScene:
         self.screen.blit(timer_surf, (tx, 10))
 
         # Labels P1 / P2
-        l1 = self.font_small.render("P1", True, COLOR_P1)
+        l1 = self.font_small.render("", True, COLOR_P1)
         self.screen.blit(l1, (20, 5))
-        l2 = self.font_small.render("P2", True, COLOR_P2)
+        l2 = self.font_small.render("", True, COLOR_P2)
         self.screen.blit(l2, (self.w - 20 - l2.get_width(), 5))
 
     def _draw_start_message(self):
