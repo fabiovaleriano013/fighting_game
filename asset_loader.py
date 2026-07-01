@@ -85,6 +85,21 @@ def get_music_paths() -> List[str]:
             paths.append(os.path.join(MUSIC_DIR, entry))
     return paths
 
+def get_menu_image_paths() -> List[str]:
+    """
+    Lista todas as imagens disponíveis na pasta assets/imagens/.
+    Retorna uma lista com os caminhos completos das imagens.
+    """
+    if not os.path.isdir(MENU_IMAGES_DIR):
+        os.makedirs(MENU_IMAGES_DIR, exist_ok=True)
+        return []
+
+    paths = []
+    for entry in sorted(os.listdir(MENU_IMAGES_DIR)):
+        ext = os.path.splitext(entry)[1].lower()
+        if ext in IMAGE_EXTENSIONS:
+            paths.append(os.path.join(MENU_IMAGES_DIR, entry))
+    return paths
 
 # ─────────────────────────────────────────────────────────────
 # Carregamento de frames de animação

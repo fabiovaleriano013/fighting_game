@@ -5,7 +5,8 @@ Controla o fluxo entre: Menu → Controles → Seleção de Personagem → Sele�
 
 import pygame
 import sys
-from menu import MainMenu, ControlsScreen, VictoryScreen
+from asset_loader import load_map_image
+from menu import MainMenu, ControlsScreen, VictoryScreen, MenuConfigScreen
 from selector import CharacterSelector, MapSelector, MusicSelector
 from fight import FightScene
 
@@ -17,6 +18,7 @@ class GameState:
     CHARACTER_SELECT = "character_select"
     MAP_SELECT = "map_select"
     MUSIC_SELECT = "music_select"
+    MENU_CONFIG = "menu_config"
     FIGHTING = "fighting"
     VICTORY = "victory"
 
@@ -38,6 +40,9 @@ class Game:
         self.selected_characters = [None, None]  # [P1, P2]
         self.selected_map = None
         self.selected_music = None
+        self.selected_menu_image = None
+        self.selected_menu_music = None
+        self.current_menu_music_path = None
         self.winner = None  # 1 ou 2
 
         # Inicializa telas
@@ -49,6 +54,7 @@ class Game:
         self.controls_screen = ControlsScreen(self.screen)
         self.char_selector = CharacterSelector(self.screen)
         self.map_selector = MapSelector(self.screen)
+        self.menu_config_screen = MenuConfigScreen(self.screen)
         self.music_selector = MusicSelector(self.screen)
         self.fight_scene = None   # Criado na hora de lutar
         self.victory_screen = None  # Criado após vitória
@@ -73,6 +79,9 @@ class Game:
             elif self.state == GameState.MUSIC_SELECT:
                 self._handle_music_select(dt)
 
+            elif self.state == GameState.MENU_CONFIG:
+                self._handle_menu_config(dt)
+
             elif self.state == GameState.FIGHTING:
                 self._handle_fighting(dt)
 
@@ -91,6 +100,8 @@ class Game:
             if event.type == pygame.QUIT:
                 self._quit()
 
+        self._ensure_menu_music()
+
         result = self.main_menu.update(events)
         self.main_menu.draw()
 
@@ -98,6 +109,13 @@ class Game:
             self.state = GameState.CHARACTER_SELECT
         elif result == "controls":
             self.state = GameState.CONTROLS
+        elif result == "menu_config":
+            self.menu_config_screen = MenuConfigScreen(
+                self.screen,
+                self.selected_menu_image,
+                self.selected_menu_music
+            )
+            self.state = GameState.MENU_CONFIG
         elif result == "quit":
             self._quit()
 
@@ -143,6 +161,21 @@ class Game:
             self.selected_map = self.map_selector.get_selected()
             self.music_selector = MusicSelector(self.screen)
             self.state = GameState.MUSIC_SELECT
+
+    def _handle_menu_config(self, dt):
+        events = pygame.event.get()
+        for event in events:
+            if event.type == pygame.QUIT:
+                self._quit()
+
+        result = self.menu_config_screen.update(events)
+        self.menu_config_screen.draw()
+
+        if result == "back":
+            self.selected_menu_image = self.menu_config_screen.get_selected_image()
+            self.selected_menu_music = self.menu_config_screen.get_selected_music()
+            self._apply_menu_settings()
+            self.state = GameState.MAIN_MENU
 
     def _handle_music_select(self, dt):
         events = pygame.event.get()
@@ -209,6 +242,7 @@ class Game:
             self.selected_map
         )
 
+        pygame.mixer.music.stop()
         if self.selected_music:
             try:
                 pygame.mixer.music.load(self.selected_music)
@@ -217,6 +251,35 @@ class Game:
                 print(f"[Game] Erro ao carregar música {self.selected_music}: {e}")
 
         self.state = GameState.FIGHTING
+
+    def _apply_menu_settings(self):
+        if self.selected_menu_image:
+            try:
+                image = load_map_image(self.selected_menu_image, (self.screen.get_width(), self.screen.get_height()))
+                self.main_menu.set_background_image(image)
+            except pygame.error as e:
+                print(f"[Game] Erro ao carregar imagem de menu {self.selected_menu_image}: {e}")
+                self.main_menu.set_background_image(None)
+        else:
+            self.main_menu.set_background_image(None)
+
+        self.current_menu_music_path = None
+        self._ensure_menu_music()
+
+    def _ensure_menu_music(self):
+        if self.selected_menu_music:
+            if (self.current_menu_music_path != self.selected_menu_music or
+                    not pygame.mixer.music.get_busy()):
+                try:
+                    pygame.mixer.music.load(self.selected_menu_music)
+                    pygame.mixer.music.play(-1)
+                    self.current_menu_music_path = self.selected_menu_music
+                except pygame.error as e:
+                    print(f"[Game] Erro ao carregar música do menu {self.selected_menu_music}: {e}")
+                    self.current_menu_music_path = None
+        else:
+            pygame.mixer.music.stop()
+            self.current_menu_music_path = None
 
     def _quit(self):
         self.running = False

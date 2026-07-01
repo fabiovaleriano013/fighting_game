@@ -170,7 +170,8 @@ MAIN_MENU → CHARACTER_SELECT → MAP_SELECT → MUSIC_SELECT → FIGHTING → 
 ## 🔧 Dicas de Expansão
 
 - **Adicionar sons:** Use `pygame.mixer.Sound` no `fighter.py` nos métodos `_start_attack` e `take_damage`.
-- **Música de fundo:** Coloque faixas em `assets/musicas/` e escolha a trilha na tela de seleção antes da luta.
+- **Música de fundo:** Coloque faixas em `assets/musicas/` e escolha a trilha no menu de configuração ou antes da luta.
+- **Menu personalizado:** Use `assets/imagens/` para imagens do menu inicial e `assets/musicas/` para músicas do menu.
 - **Múltiplas rodadas:** Adicione um contador de rounds em `fight.py` e `game.py`.
 - **Efeitos especiais:** Crie uma classe `Particle` e gerencie-a em `fight.py`.
 - **Rede local:** Substitua a leitura de `keys` no `fighter.py` por dados de socket.

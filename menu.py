@@ -3,9 +3,11 @@ menu.py - Telas de menu do jogo.
 Contém: Menu Principal, Tela de Controles, Tela de Vitória.
 """
 
+import os
 import pygame
 import math
 from typing import Optional, List
+from asset_loader import get_menu_image_paths, get_music_paths, load_map_thumbnail
 
 
 # ─────────────────────────────────────────────────────────────
@@ -52,9 +54,10 @@ class MainMenu:
     """Tela de menu principal com navegação por teclado."""
 
     ITEMS = [
-        ("JOGAR",     "play"),
-        ("CONTROLES", "controls"),
-        ("SAIR",       "quit"),
+        ("JOGAR",          "play"),
+        ("CONTROLES",      "controls"),
+        ("CONFIGURAR MENU", "menu_config"),
+        ("SAIR",           "quit"),
     ]
 
     def __init__(self, screen: pygame.Surface):
@@ -69,6 +72,10 @@ class MainMenu:
         self.font_sub    = pygame.font.SysFont("Arial", 18)
         self.font_item   = pygame.font.SysFont("Arial", 38, bold=True)
         self.font_item_s = pygame.font.SysFont("Arial", 44, bold=True)
+        self.background = None
+
+    def set_background_image(self, image: Optional[pygame.Surface]):
+        self.background = image
 
     def update(self, events) -> Optional[str]:
         """Processa eventos e retorna ação ou None."""
@@ -85,7 +92,10 @@ class MainMenu:
         return None
 
     def draw(self):
-        draw_gradient_bg(self.screen, COLOR_BG_TOP, COLOR_BG_BOT)
+        if self.background:
+            self.screen.blit(self.background, (0, 0))
+        else:
+            draw_gradient_bg(self.screen, COLOR_BG_TOP, COLOR_BG_BOT)
 
         # Partículas de fundo (estrelas animadas)
         self._draw_stars()
@@ -142,6 +152,122 @@ class MainMenu:
             s = pygame.Surface((size * 2, size * 2), pygame.SRCALPHA)
             pygame.draw.circle(s, (255, 255, 255, alpha), (size, size), size)
             self.screen.blit(s, (x, y))
+
+
+class MenuConfigScreen:
+    """Tela de configuração de imagem e música do menu principal."""
+
+    def __init__(self, screen: pygame.Surface, selected_image: Optional[str] = None, selected_music: Optional[str] = None):
+        self.screen = screen
+        self.w = screen.get_width()
+        self.h = screen.get_height()
+
+        self.font_title = pygame.font.SysFont("Impact", 46)
+        self.font_label = pygame.font.SysFont("Arial", 24, bold=True)
+        self.font_text = pygame.font.SysFont("Arial", 18)
+        self.font_hint = pygame.font.SysFont("Arial", 16)
+
+        self.image_paths: List[str] = get_menu_image_paths()
+        if not self.image_paths:
+            self.image_paths = ["__placeholder__"]
+
+        self.music_paths: List[str] = get_music_paths()
+        if not self.music_paths:
+            self.music_paths = ["__placeholder__"]
+
+        self.selected_image_index = 0
+        self.selected_music_index = 0
+        if selected_image and selected_image in self.image_paths:
+            self.selected_image_index = self.image_paths.index(selected_image)
+        if selected_music and selected_music in self.music_paths:
+            self.selected_music_index = self.music_paths.index(selected_music)
+
+        self.active_field = 0
+
+    def update(self, events) -> Optional[str]:
+        for event in events:
+            if event.type == pygame.KEYDOWN:
+                if event.key in (pygame.K_ESCAPE, pygame.K_RETURN, pygame.K_SPACE):
+                    return "back"
+                elif event.key in (pygame.K_UP, pygame.K_w):
+                    self.active_field = (self.active_field - 1) % 2
+                elif event.key in (pygame.K_DOWN, pygame.K_s):
+                    self.active_field = (self.active_field + 1) % 2
+                elif event.key in (pygame.K_LEFT, pygame.K_a):
+                    if self.active_field == 0:
+                        self.selected_image_index = (self.selected_image_index - 1) % len(self.image_paths)
+                    else:
+                        self.selected_music_index = (self.selected_music_index - 1) % len(self.music_paths)
+                elif event.key in (pygame.K_RIGHT, pygame.K_d):
+                    if self.active_field == 0:
+                        self.selected_image_index = (self.selected_image_index + 1) % len(self.image_paths)
+                    else:
+                        self.selected_music_index = (self.selected_music_index + 1) % len(self.music_paths)
+        return None
+
+    def get_selected_image(self) -> Optional[str]:
+        if self.image_paths[self.selected_image_index] == "__placeholder__":
+            return None
+        return self.image_paths[self.selected_image_index]
+
+    def get_selected_music(self) -> Optional[str]:
+        if self.music_paths[self.selected_music_index] == "__placeholder__":
+            return None
+        return self.music_paths[self.selected_music_index]
+
+    def draw(self):
+        draw_gradient_bg(self.screen, COLOR_BG_TOP, COLOR_BG_BOT)
+
+        title = self.font_title.render("CONFIGURAR MENU", True, COLOR_ACCENT)
+        self.screen.blit(title, (self.w // 2 - title.get_width() // 2, 30))
+
+        # Imagem do menu
+        image_label = self.font_label.render("Imagem do Menu", True, COLOR_WHITE)
+        image_y = 130
+        self.screen.blit(image_label, (80, image_y))
+        image_name = os.path.splitext(os.path.basename(self.image_paths[self.selected_image_index]))[0]
+        if self.image_paths[self.selected_image_index] == "__placeholder__":
+            image_name = "Nenhuma imagem encontrada"
+        image_text = self.font_text.render(image_name.replace("_", " ").title(), True, COLOR_GRAY)
+        self.screen.blit(image_text, (80, image_y + 38))
+
+        # Música do menu
+        music_label = self.font_label.render("Música do Menu", True, COLOR_WHITE)
+        music_y = 220
+        self.screen.blit(music_label, (80, music_y))
+        if self.music_paths[self.selected_music_index] == "__placeholder__":
+            music_name = "Nenhuma música encontrada"
+        else:
+            music_name = os.path.splitext(os.path.basename(self.music_paths[self.selected_music_index]))[0]
+        music_text = self.font_text.render(music_name.replace("_", " ").title(), True, COLOR_GRAY)
+        self.screen.blit(music_text, (80, music_y + 38))
+
+        # Preview da imagem
+        preview_x = self.w - 360
+        preview_y = 130
+        preview_w = 280
+        preview_h = 180
+        preview_rect = pygame.Rect(preview_x, preview_y, preview_w, preview_h)
+        pygame.draw.rect(self.screen, (40, 40, 50), preview_rect, border_radius=10)
+        pygame.draw.rect(self.screen, COLOR_ACCENT, preview_rect, 2, border_radius=10)
+
+        if self.image_paths[self.selected_image_index] != "__placeholder__":
+            preview = load_map_thumbnail(self.image_paths[self.selected_image_index], (preview_w - 12, preview_h - 12))
+            self.screen.blit(preview, (preview_x + 6, preview_y + 6))
+        else:
+            placeholder = self.font_text.render("Preview indisponível", True, COLOR_GRAY)
+            self.screen.blit(placeholder, (preview_x + 16, preview_y + preview_h // 2 - 10))
+
+        # Seleção ativa
+        for idx, label in enumerate(["Imagem", "Música"]):
+            color = COLOR_GOLD if self.active_field == idx else COLOR_WHITE
+            mark = "> " if self.active_field == idx else "  "
+            line = self.font_text.render(f"{mark}{label}", True, color)
+            self.screen.blit(line, (80, 320 + idx * 28))
+
+        hint = self.font_hint.render(
+            "↑↓ Selecionar   ←→ Alterar   ENTER/ESC Voltar", True, COLOR_GRAY)
+        self.screen.blit(hint, (self.w // 2 - hint.get_width() // 2, self.h - 40))
 
 
 # ─────────────────────────────────────────────────────────────
