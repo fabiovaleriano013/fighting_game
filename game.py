@@ -6,7 +6,7 @@ Controla o fluxo entre: Menu → Controles → Seleção de Personagem → Sele�
 import pygame
 import sys
 from menu import MainMenu, ControlsScreen, VictoryScreen
-from selector import CharacterSelector, MapSelector
+from selector import CharacterSelector, MapSelector, MusicSelector
 from fight import FightScene
 
 
@@ -16,6 +16,7 @@ class GameState:
     CONTROLS = "controls"
     CHARACTER_SELECT = "character_select"
     MAP_SELECT = "map_select"
+    MUSIC_SELECT = "music_select"
     FIGHTING = "fighting"
     VICTORY = "victory"
 
@@ -36,6 +37,7 @@ class Game:
         # Dados compartilhados entre telas
         self.selected_characters = [None, None]  # [P1, P2]
         self.selected_map = None
+        self.selected_music = None
         self.winner = None  # 1 ou 2
 
         # Inicializa telas
@@ -47,6 +49,7 @@ class Game:
         self.controls_screen = ControlsScreen(self.screen)
         self.char_selector = CharacterSelector(self.screen)
         self.map_selector = MapSelector(self.screen)
+        self.music_selector = MusicSelector(self.screen)
         self.fight_scene = None   # Criado na hora de lutar
         self.victory_screen = None  # Criado após vitória
 
@@ -66,6 +69,9 @@ class Game:
 
             elif self.state == GameState.MAP_SELECT:
                 self._handle_map_select(dt)
+
+            elif self.state == GameState.MUSIC_SELECT:
+                self._handle_music_select(dt)
 
             elif self.state == GameState.FIGHTING:
                 self._handle_fighting(dt)
@@ -135,6 +141,22 @@ class Game:
             self.state = GameState.CHARACTER_SELECT
         elif result == "confirm":
             self.selected_map = self.map_selector.get_selected()
+            self.music_selector = MusicSelector(self.screen)
+            self.state = GameState.MUSIC_SELECT
+
+    def _handle_music_select(self, dt):
+        events = pygame.event.get()
+        for event in events:
+            if event.type == pygame.QUIT:
+                self._quit()
+
+        result = self.music_selector.update(events)
+        self.music_selector.draw()
+
+        if result == "back":
+            self.state = GameState.MAP_SELECT
+        elif result == "confirm":
+            self.selected_music = self.music_selector.get_selected()
             self._start_fight()
 
     def _handle_fighting(self, dt):
@@ -147,7 +169,7 @@ class Game:
         self.fight_scene.draw()
 
         if result is not None:
-            # result é o número do vencedor (1 ou 2)
+            pygame.mixer.music.stop()
             self.winner = result
             self.victory_screen = VictoryScreen(
                 self.screen,
@@ -180,12 +202,20 @@ class Game:
     # ─────────────────────────────────────────────
 
     def _start_fight(self):
-        """Cria uma nova cena de luta com os personagens e mapa selecionados."""
+        """Cria uma nova cena de luta com os personagens, mapa e música selecionados."""
         self.fight_scene = FightScene(
             self.screen,
             self.selected_characters,
             self.selected_map
         )
+
+        if self.selected_music:
+            try:
+                pygame.mixer.music.load(self.selected_music)
+                pygame.mixer.music.play(-1)
+            except pygame.error as e:
+                print(f"[Game] Erro ao carregar música {self.selected_music}: {e}")
+
         self.state = GameState.FIGHTING
 
     def _quit(self):

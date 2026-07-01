@@ -7,7 +7,7 @@ import pygame
 import os
 from typing import List, Optional, Tuple
 from asset_loader import (
-    get_character_names, get_map_paths,
+    get_character_names, get_map_paths, get_music_paths,
     load_character_thumbnail, load_map_thumbnail
 )
 from menu import (
@@ -309,3 +309,73 @@ class MapSelector:
         # Dica
         hint = self.font_hint.render("← → Navegar   ENTER Confirmar   ESC Voltar", True, COLOR_GRAY)
         self.screen.blit(hint, (self.w // 2 - hint.get_width() // 2, self.h - 30))
+
+
+class MusicSelector:
+    """
+    Tela de seleção de música de fundo.
+    ←/→ para navegar, ENTER para confirmar, ESC para voltar.
+    """
+
+    def __init__(self, screen: pygame.Surface):
+        self.screen = screen
+        self.w = screen.get_width()
+        self.h = screen.get_height()
+
+        self.font_title = pygame.font.SysFont("Impact", 50)
+        self.font_name = pygame.font.SysFont("Arial", 24, bold=True)
+        self.font_hint = pygame.font.SysFont("Arial", 16)
+        self.font_info = pygame.font.SysFont("Arial", 18)
+
+        self.music_paths: List[str] = get_music_paths()
+        if not self.music_paths:
+            self.music_paths = ["__placeholder__"]
+
+        self.cursor = 0
+
+    def update(self, events) -> Optional[str]:
+        for event in events:
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    return "back"
+                elif event.key in (pygame.K_LEFT, pygame.K_a):
+                    self.cursor = (self.cursor - 1) % len(self.music_paths)
+                elif event.key in (pygame.K_RIGHT, pygame.K_d):
+                    self.cursor = (self.cursor + 1) % len(self.music_paths)
+                elif event.key in (pygame.K_RETURN, pygame.K_SPACE):
+                    return "confirm"
+        return None
+
+    def get_selected(self) -> Optional[str]:
+        if self.music_paths[self.cursor] == "__placeholder__":
+            return None
+        return self.music_paths[self.cursor]
+
+    def draw(self):
+        draw_gradient_bg(self.screen, COLOR_BG_TOP, COLOR_BG_BOT)
+
+        title = self.font_title.render("SELECIONE A MÚSICA", True, COLOR_ACCENT)
+        self.screen.blit(title, (self.w // 2 - title.get_width() // 2, 18))
+        pygame.draw.line(self.screen, COLOR_ACCENT,
+                         (self.w // 2 - 260, 74), (self.w // 2 + 260, 74), 2)
+
+        if self.music_paths[self.cursor] == "__placeholder__":
+            info = self.font_info.render(
+                "Nenhuma música encontrada em assets/musicas/", True, COLOR_WHITE)
+            hint = self.font_info.render(
+                "Coloque arquivos .mp3, .wav, .ogg ou .flac na pasta e reinicie.", True, COLOR_GRAY)
+            self.screen.blit(info, (self.w // 2 - info.get_width() // 2, self.h // 2 - 20))
+            self.screen.blit(hint, (self.w // 2 - hint.get_width() // 2, self.h // 2 + 12))
+        else:
+            music_name = os.path.splitext(os.path.basename(self.music_paths[self.cursor]))[0]
+            music_name = music_name.replace("_", " ").title()
+            music_surf = self.font_name.render(music_name, True, COLOR_WHITE)
+            self.screen.blit(music_surf, (self.w // 2 - music_surf.get_width() // 2, self.h // 2 - 24))
+
+            detail = self.font_info.render(
+                f"Arquivo: {os.path.basename(self.music_paths[self.cursor])}", True, COLOR_GRAY)
+            self.screen.blit(detail, (self.w // 2 - detail.get_width() // 2, self.h // 2 + 24))
+
+        prompt = self.font_hint.render(
+            "← → Navegar   ENTER Confirmar   ESC Voltar", True, COLOR_GRAY)
+        self.screen.blit(prompt, (self.w // 2 - prompt.get_width() // 2, self.h - 40))

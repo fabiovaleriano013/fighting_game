@@ -15,12 +15,16 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 ASSETS_DIR = os.path.join(BASE_DIR, "assets")
 CHARACTERS_DIR = os.path.join(ASSETS_DIR, "personagens")
 MAPS_DIR = os.path.join(ASSETS_DIR, "mapas")
+MUSIC_DIR = os.path.join(ASSETS_DIR, "musicas")
 
 # Ações esperadas para cada personagem (pastas dentro da pasta do personagem)
 CHARACTER_ACTIONS = ["idle", "walk", "attack", "jump", "crouch", "defend"]
 
 # Extensões de imagem suportadas
 IMAGE_EXTENSIONS = {".png", ".jpg", ".jpeg", ".bmp", ".gif"}
+
+# Extensões de áudio suportadas para música de fundo
+AUDIO_EXTENSIONS = {".mp3", ".wav", ".ogg", ".flac"}
 
 # Tamanho padrão normalizado para todos os sprites de personagens (em pixels)
 # Isso garante que todos os personagens fiquem com o mesmo tamanho no jogo
@@ -62,6 +66,23 @@ def get_map_paths() -> List[str]:
         ext = os.path.splitext(entry)[1].lower()
         if ext in IMAGE_EXTENSIONS:
             paths.append(os.path.join(MAPS_DIR, entry))
+    return paths
+
+
+def get_music_paths() -> List[str]:
+    """
+    Lista todas as trilhas disponíveis na pasta assets/musicas/.
+    Retorna uma lista com os caminhos completos dos arquivos de áudio.
+    """
+    if not os.path.isdir(MUSIC_DIR):
+        os.makedirs(MUSIC_DIR, exist_ok=True)
+        return []
+
+    paths = []
+    for entry in sorted(os.listdir(MUSIC_DIR)):
+        ext = os.path.splitext(entry)[1].lower()
+        if ext in AUDIO_EXTENSIONS:
+            paths.append(os.path.join(MUSIC_DIR, entry))
     return paths
 
 

@@ -142,10 +142,10 @@ asset_loader.py  ← usado por selector.py e fighter.py
 
 ### Fluxo de estados:
 ```
-MAIN_MENU → CHARACTER_SELECT → MAP_SELECT → FIGHTING → VICTORY
-               ↑ (ESC)            ↑ (ESC)        ↓ (vencedor)
-                                               FIGHTING (revanche)
-                                               MAIN_MENU (menu)
+MAIN_MENU → CHARACTER_SELECT → MAP_SELECT → MUSIC_SELECT → FIGHTING → VICTORY
+               ↑ (ESC)            ↑ (ESC)             ↑ (ESC)        ↓ (vencedor)
+                                                          FIGHTING (revanche)
+                                                          MAIN_MENU (menu)
 ```
 
 ---
@@ -170,6 +170,7 @@ MAIN_MENU → CHARACTER_SELECT → MAP_SELECT → FIGHTING → VICTORY
 ## 🔧 Dicas de Expansão
 
 - **Adicionar sons:** Use `pygame.mixer.Sound` no `fighter.py` nos métodos `_start_attack` e `take_damage`.
+- **Música de fundo:** Coloque faixas em `assets/musicas/` e escolha a trilha na tela de seleção antes da luta.
 - **Múltiplas rodadas:** Adicione um contador de rounds em `fight.py` e `game.py`.
 - **Efeitos especiais:** Crie uma classe `Particle` e gerencie-a em `fight.py`.
 - **Rede local:** Substitua a leitura de `keys` no `fighter.py` por dados de socket.
