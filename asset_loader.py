@@ -16,6 +16,7 @@ ASSETS_DIR = os.path.join(BASE_DIR, "assets")
 CHARACTERS_DIR = os.path.join(ASSETS_DIR, "personagens")
 MAPS_DIR = os.path.join(ASSETS_DIR, "mapas")
 MUSIC_DIR = os.path.join(ASSETS_DIR, "musicas")
+MENU_IMAGES_DIR = os.path.join(ASSETS_DIR, "imagens")
 
 # Ações esperadas para cada personagem (pastas dentro da pasta do personagem)
 CHARACTER_ACTIONS = ["idle", "walk", "attack", "jump", "crouch", "defend"]
